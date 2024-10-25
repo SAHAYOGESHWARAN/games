@@ -10,14 +10,18 @@ let car = {
 };
 
 let obstacles = [];
+let obstacleSpeed = 2;
 let gameInterval;
 let isGameRunning = false;
+let score = 0;
 
 document.getElementById("startGame").addEventListener("click", startGame);
 
 function startGame() {
     if (!isGameRunning) {
         isGameRunning = true;
+        score = 0;
+        obstacles = [];
         gameInterval = setInterval(updateGameArea, 20);
     }
 }
@@ -27,8 +31,10 @@ function updateGameArea() {
     moveCar();
     drawCar();
     generateObstacles();
+    moveObstacles();
     drawObstacles();
     checkCollision();
+    updateScore();
 }
 
 function clearCanvas() {
@@ -52,13 +58,44 @@ function moveCar() {
 }
 
 function generateObstacles() {
-    // Logic for generating obstacles
+    if (Math.random() < 0.02) {  // Generate a new obstacle occasionally
+        let obstacleX = Math.random() * (canvas.width - 40);
+        obstacles.push({ x: obstacleX, y: 0, width: 40, height: 80 });
+    }
+}
+
+function moveObstacles() {
+    for (let i = 0; i < obstacles.length; i++) {
+        obstacles[i].y += obstacleSpeed;
+    }
+    obstacles = obstacles.filter(obstacle => obstacle.y < canvas.height);  // Remove off-screen obstacles
 }
 
 function drawObstacles() {
-    // Logic for drawing obstacles
+    ctx.fillStyle = "red";
+    for (let i = 0; i < obstacles.length; i++) {
+        ctx.fillRect(obstacles[i].x, obstacles[i].y, obstacles[i].width, obstacles[i].height);
+    }
 }
 
 function checkCollision() {
-    // Logic for checking collision between car and obstacles
+    for (let i = 0; i < obstacles.length; i++) {
+        if (car.x < obstacles[i].x + obstacles[i].width &&
+            car.x + car.width > obstacles[i].x &&
+            car.y < obstacles[i].y + obstacles[i].height &&
+            car.height + car.y > obstacles[i].y) {
+            gameOver();
+        }
+    }
+}
+
+function updateScore() {
+    score++;
+    document.getElementById("score").innerText = "Score: " + score;
+}
+
+function gameOver() {
+    clearInterval(gameInterval);
+    isGameRunning = false;
+    alert("Game Over! Your final score is: " + score);
 }
