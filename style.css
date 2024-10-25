@@ -1,26 +1,59 @@
+/* General Styling */
 body {
-    background-color: #282c34;
+    background-color: #343a40;
     color: white;
-    font-family: Arial, sans-serif;
 }
 
 .game-area {
-    display: flex;
-    justify-content: center;
-    margin-top: 20px;
+    margin: 0 auto;
+    position: relative;
+    background-color: #6c757d;
 }
 
 canvas {
-    background-color: #333;
-    border: 2px solid white;
-    width: 400px;
-    height: 600px;
+    border: 3px solid #000;
+    background: linear-gradient(to bottom, #555555 33%, #444444 33%, #333333 33%);
 }
 
-h1 {
-    color: #61dafb;
+.score-display {
+    font-size: 1.5rem;
+    margin-top: 15px;
+    font-weight: bold;
+    color: #00b7ff;
 }
 
-#score {
-    color: #61dafb;
+/* Traffic Lights */
+.traffic-light {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    width: 50px;
+    height: 140px;
+    background-color: #222;
+    border-radius: 10px;
+    padding: 10px;
+}
+
+.light {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    margin: 10px auto;
+    background-color: #444;
+}
+
+.light.red {
+    background-color: #ff4b4b;
+}
+
+.light.yellow {
+    background-color: #ffc107;
+}
+
+.light.green {
+    background-color: #28a745;
+}
+
+.light.active {
+    box-shadow: 0 0 15px 5px rgba(255, 255, 255, 0.5);
 }

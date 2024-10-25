@@ -13,16 +13,49 @@ let obstacles = [];
 let obstacleSpeed = 2;
 let gameInterval;
 let isGameRunning = false;
+let isGamePaused = false;
 let score = 0;
+let keys = {};
+let trafficLightState = 'green'; // Traffic light state: green, yellow, red
+let lightChangeInterval;
+let bgMusic = document.getElementById("bgMusic");
 
-document.getElementById("startGame").addEventListener("click", startGame);
+// Event Listeners for Game Controls
+document.getElementById("startGame").addEventListener("click", startOrResumeGame);
+document.getElementById("pauseGame").addEventListener("click", pauseGame);
+
+function startOrResumeGame() {
+    if (!isGameRunning) {
+        startGame();
+    } else if (isGamePaused) {
+        resumeGame();
+    }
+    bgMusic.play(); // Play background music
+}
 
 function startGame() {
-    if (!isGameRunning) {
-        isGameRunning = true;
-        score = 0;
-        obstacles = [];
+    isGameRunning = true;
+    isGamePaused = false;
+    score = 0;
+    obstacles = [];
+    gameInterval = setInterval(updateGameArea, 20);
+    lightChangeInterval = setInterval(changeTrafficLight, 3000); // Change light every 3 seconds
+    document.getElementById("score").innerText = "0";
+}
+
+function resumeGame() {
+    if (isGamePaused) {
+        isGamePaused = false;
         gameInterval = setInterval(updateGameArea, 20);
+    }
+}
+
+function pauseGame() {
+    if (isGameRunning && !isGamePaused) {
+        isGamePaused = true;
+        clearInterval(gameInterval);
+        clearInterval(lightChangeInterval);
+        bgMusic.pause(); // Pause background music
     }
 }
 
@@ -47,18 +80,26 @@ function drawCar() {
 }
 
 function moveCar() {
-    document.addEventListener("keydown", function (event) {
-        if (event.code === "ArrowLeft" && car.x > 0) {
+    if (trafficLightState === 'green' || trafficLightState === 'yellow') { // Allow movement on green and yellow light
+        if (keys["ArrowLeft"] && car.x > 0) {
             car.x -= car.speed;
         }
-        if (event.code === "ArrowRight" && car.x < canvas.width - car.width) {
+        if (keys["ArrowRight"] && car.x < canvas.width - car.width) {
             car.x += car.speed;
         }
-    });
+    }
 }
 
+document.addEventListener("keydown", function (event) {
+    keys[event.code] = true;
+});
+
+document.addEventListener("keyup", function (event) {
+    keys[event.code] = false;
+});
+
 function generateObstacles() {
-    if (Math.random() < 0.02) {  // Generate a new obstacle occasionally
+    if (Math.random() < 0.02) {
         let obstacleX = Math.random() * (canvas.width - 40);
         obstacles.push({ x: obstacleX, y: 0, width: 40, height: 80 });
     }
@@ -68,7 +109,7 @@ function moveObstacles() {
     for (let i = 0; i < obstacles.length; i++) {
         obstacles[i].y += obstacleSpeed;
     }
-    obstacles = obstacles.filter(obstacle => obstacle.y < canvas.height);  // Remove off-screen obstacles
+    obstacles = obstacles.filter(obstacle => obstacle.y < canvas.height);
 }
 
 function drawObstacles() {
@@ -91,11 +132,34 @@ function checkCollision() {
 
 function updateScore() {
     score++;
-    document.getElementById("score").innerText = "Score: " + score;
+    document.getElementById("score").innerText = score;
 }
 
 function gameOver() {
     clearInterval(gameInterval);
+    clearInterval(lightChangeInterval);
+    bgMusic.pause();
     isGameRunning = false;
+    isGamePaused = false;
     alert("Game Over! Your final score is: " + score);
+}
+
+// Traffic Light Logic
+function changeTrafficLight() {
+    const trafficLight = document.getElementById("trafficLight");
+    if (trafficLightState === 'green') {
+        trafficLightState = 'yellow';
+        setActiveLight('yellow');
+    } else if (trafficLightState === 'yellow') {
+        trafficLightState = 'red';
+        setActiveLight('red');
+    } else {
+        trafficLightState = 'green';
+        setActiveLight('green');
+    }
+}
+
+function setActiveLight(color) {
+    document.querySelectorAll('.light').forEach(light => light.classList.remove('active'));
+    document.querySelector(`.light.${color}`).classList.add('active');
 }
